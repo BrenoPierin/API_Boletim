@@ -11,8 +11,8 @@ namespace APIBoletim.Interfaces
 
       List<Aluno> LerTodos();
       Aluno BuscarPorID(int id);
-      Aluno Cadastrar();
-      Aluno Alterar(Aluno a);
-      Aluno Excluir(Aluno a);
+      Aluno Cadastrar(Aluno a);
+      Aluno Alterar(int id, Aluno a);
+      void Excluir(int id);
     }
 }

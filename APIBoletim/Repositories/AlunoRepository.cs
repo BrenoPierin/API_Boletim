@@ -1,37 +1,121 @@
-﻿using APIBoletim.Domains;
+﻿using APIBoletim.Context;
+using APIBoletim.Domains;
 using APIBoletim.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace APIBoletim.Repositories
 {
+
     public class AlunoRepository : IAluno
     {
-        public Aluno Alterar(Aluno a)
+        BoletimContext conexao = new BoletimContext();
+
+        SqlCommand cmd = new SqlCommand();
+        public Aluno Alterar(int id, Aluno a)
         {
-            throw new NotImplementedException();
+            cmd.Connection = conexao.Conectar();
+            cmd.CommandText = "UPDATE Aluno SET " +
+                "Nome = @nome," +
+                "RA = @ra," +
+                "Idade = @idade WHERE IdAluno = @id";
+
+            cmd.Parameters.AddWithValue("id", id);
+
+            cmd.Parameters.AddWithValue("@nome", a.Nome);
+            cmd.Parameters.AddWithValue("@ra", a.RA);
+            cmd.Parameters.AddWithValue("@idade", a.Idade);
+
+            cmd.ExecuteNonQuery();
+
+            conexao.Desconectar();
+            return a;
         }
 
         public Aluno BuscarPorID(int id)
         {
-            throw new NotImplementedException();
+            cmd.Connection = conexao.Conectar();
+
+            cmd.CommandText = "SELECT * FROM Aluno WHERE IdAluno = @id";
+            cmd.Parameters.AddWithValue("@id", id);
+
+            SqlDataReader dados = cmd.ExecuteReader();
+
+            Aluno aluno = new Aluno();
+
+            while (dados.Read())
+            {
+             
+                aluno.IdAluno = Convert.ToInt32(dados.GetValue(0));
+                aluno.Nome = dados.GetValue(1).ToString();
+                aluno.RA = dados.GetValue(2).ToString();
+                aluno.Idade = Int32.Parse(dados.GetValue(3).ToString());
+            }
+
+            conexao.Desconectar();
+
+            return aluno;
         }
 
-        public Aluno Cadastrar()
+        public Aluno Cadastrar(Aluno a)
         {
-            throw new NotImplementedException();
+            cmd.Connection = conexao.Conectar();
+
+            cmd.CommandText =
+                "INSERT INTO Aluno (Nome, RA, Idade) " +
+                "VALUES" +
+                "(@nome, @ra, @idade)";
+            cmd.Parameters.AddWithValue("@nome", a.Nome);
+            cmd.Parameters.AddWithValue("@ra", a.RA);
+            cmd.Parameters.AddWithValue("@idade", a.Idade);
+
+            cmd.ExecuteNonQuery();
+
+            conexao.Desconectar();
+
+            return a;
         }
 
-        public Aluno Excluir(Aluno a)
+        public void Excluir(int id)
         {
-            throw new NotImplementedException();
+            cmd.Connection = conexao.Conectar();
+
+            cmd.CommandText = "DELETE FROM Aluno WHERE IdAluno = @id";
+            cmd.Parameters.AddWithValue("@id", id);
+
+            cmd.ExecuteNonQuery();
+
+            conexao.Desconectar();
         }
 
         public List<Aluno> LerTodos()
         {
-            throw new NotImplementedException();
+            cmd.Connection = conexao.Conectar();
+
+            cmd.CommandText = "SELECT * FROM aluno";
+
+            SqlDataReader dados = cmd.ExecuteReader();
+
+            List<Aluno> alunos = new List<Aluno>();
+
+            while (dados.Read())
+            {
+                alunos.Add(
+                    new Aluno()
+                    {
+                        IdAluno = Convert.ToInt32(dados.GetValue(0)),
+                        Nome = dados.GetValue(1).ToString(),
+                        RA = dados.GetValue(2).ToString(),
+                        Idade = Convert.ToInt32(dados.GetValue(3))
+                    }
+
+                    );
+            }
+            conexao.Desconectar();
+            return alunos;
         }
     }
 }
